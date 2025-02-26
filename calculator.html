@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DNA Concentration Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(to right, #FFEBB2, #B2D8FF);
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        /* Hide scrollbar for Chrome, Safari, and Opera */
+        .container::-webkit-scrollbar {
+            display: none;
+        }
+        /* Hide scrollbar for IE, Edge, and Firefox */
+        .container {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+        .header {
+            background: #FFA500;
+            color: rgb(255, 254, 254);
+            padding: 10px;
+            border-radius: 10px 10px 0 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ec6767;
+            border-radius: 5px;
+            box-sizing: border-box;
+            background-color: #f9f9f9;
+        }
+        input:focus {
+            background-color: white;
+        }
+        input::placeholder {
+            color: #aaa;
+        }
+        button {
+            background: #FFD700;
+            color: black;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 10px;
+        }
+        button:hover {
+            background: #FFC107;
+        }
+        .result {
+            margin-top: 20px;
+            font-weight: bold;
+        }
+        .entered-values {
+            color: #007BFF; /* Blue color for entered values */
+        }
+        .output-text {
+            color: green; /* Green color for results */
+        }
+        .instruction-button {
+            background: none;
+            color: #007BFF;
+            border: none;
+            padding: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            text-decoration: underline;
+        }
+        .instruction-button:hover {
+            color: #0056b3;
+        }
+        .instruction-text {
+            display: none;
+            margin-top: 20px;
+            padding: 10px;
+            background: linear-gradient(to right, #FFCCCB, #E6E6FA); /* Light red and light purple gradient */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            text-align: left;
+        }
+        hr {
+            border: 0;
+            height: 1px;
+            background: #ddd;
+            margin: 20px 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                width: 95%;
+                padding: 15px;
+            }
+            .header {
+                font-size: 16px;
+            }
+            input, select, button {
+                font-size: 14px;
+            }
+        }
+    </style>
+    <script>
+        function calculateDNA() {
+            let a230 = parseFloat(document.getElementById("a230").value) || 0;
+            let a260 = parseFloat(document.getElementById("a260").value);
+            let a280 = parseFloat(document.getElementById("a280").value) || 0;
+            let a320 = parseFloat(document.getElementById("a320").value) || 0;
+            let dilution = parseFloat(document.getElementById("dilution").value) || 1;
+            let volume = parseFloat(document.getElementById("volume").value);
+            let unitFactor = parseFloat(document.getElementById("unit").value);
+
+            if (!a260 || !volume) {
+                document.getElementById("output").innerHTML = "<span style='color: red;'>A260 and Volume are required!</span>";
+                return;
+            }
+
+            let dnaConcentration = (a260 - a320) * dilution * 50;
+            let totalYield = dnaConcentration * (volume * unitFactor);
+            let purity260_280 = a280 !== 0 ? (a260 - a320) / (a280 - a320) : "N/A";
+            let purity260_230 = a230 !== 0 ? a260 / a230 : "N/A";
+
+            // Purity Check 1 Evaluation
+            let purity260_280_quality;
+            if (purity260_280 !== "N/A") {
+                if (purity260_280 >= 1.8) {
+                    purity260_280_quality = "Pure";
+                } else if (purity260_280 >= 1.5 && purity260_280 < 1.8) {
+                    purity260_280_quality = "Good";
+                } else {
+                    purity260_280_quality = "Impure";
+                }
+            } else {
+                purity260_280_quality = "N/A";
+            }
+
+            // Purity Check 2 Evaluation
+            let purity260_230_quality;
+            if (purity260_230 !== "N/A") {
+                if (purity260_230 >= 2 && purity260_230 <= 2.2) {
+                    purity260_230_quality = "Pure";
+                } else if (purity260_230 >= 1.5 && purity260_230 < 2) {
+                    purity260_230_quality = "Good";
+                } else {
+                    purity260_230_quality = "Impure";
+                }
+            } else {
+                purity260_230_quality = "N/A";
+            }
+
+            document.getElementById("output").innerHTML = `
+                <div class="entered-values">
+                    <p><strong>Entered Values:</strong></p>
+                    <p>A230: ${a230}</p>
+                    <p>A260: ${a260}</p>
+                    <p>A280: ${a280}</p>
+                    <p>A320: ${a320}</p>
+                    <p>Dilution Factor: ${dilution}</p>
+                    <p>Total DNA Volume: ${volume} ml</p>
+                </div>
+                <hr>
+                <div class="output-text">
+                    <p><strong>Results:</strong></p>
+                    <p>DNA Concentration: <strong>${dnaConcentration.toFixed(2)} µg/ml</strong></p>
+                    <p>Total DNA Yield: <strong>${totalYield.toFixed(2)} µg</strong></p>
+                    <p>Purity (A260/A280): <strong>${purity260_280}</strong> (${purity260_280_quality})</p>
+                    <p>Purity (A260/A230): <strong>${purity260_230}</strong> (${purity260_230_quality})</p>
+                </div>
+            `;
+        }
+
+        function showInstructions() {
+            let instructionText = document.getElementById("instruction-text");
+            instructionText.style.display = instructionText.style.display === "none" ? "block" : "none";
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">DNA Concentration Calculator</div>
+        <div class="input-group">
+            <label for="a230">A230 (Optional):</label>
+            <input type="number" id="a230" step="0.01" placeholder="Enter A230 value">
+        </div>
+        <div class="input-group">
+            <label for="a260">A260 (Required):</label>
+            <input type="number" id="a260" step="0.01" required placeholder="Enter A260 value">
+        </div>
+        <div class="input-group">
+            <label for="a280">A280 (Optional):</label>
+            <input type="number" id="a280" step="0.01" placeholder="Enter A280 value">
+        </div>
+        <div class="input-group">
+            <label for="a320">A320 (Optional):</label>
+            <input type="number" id="a320" step="0.01" placeholder="Enter A320 value">
+        </div>
+        <div class="input-group">
+            <label for="dilution">Dilution Factor (Default 1 if not provided):</label>
+            <input type="number" id="dilution" value="1" placeholder="Enter dilution factor">
+        </div>
+        <div class="input-group">
+            <label for="volume">Total DNA Volume (Can't be Zero; ml):</label>
+            <input type="number" id="volume" step="0.01" required placeholder="Enter volume in ml">
+        </div>
+        <div class="input-group">
+            <label for="unit">Volume Unit:</label>
+            <select id="unit">
+                <option value="1">ml</option>
+                <option value="0.001">μl</option>
+                <option value="1000">L</option>
+            </select>
+        </div>
+        <button onclick="calculateDNA()">Calculate</button>
+        <button class="instruction-button" onclick="showInstructions()">Show Instructions</button>
+        <div class="instruction-text" id="instruction-text">
+            <p><strong>Instructions:</strong></p>
+            <p><strong>Inputs:</strong></p>
+            <ul>
+                <li><strong>A230</strong> (Optional, can't be zero; number)</li>
+                <li><strong>A260</strong> (Cannot be left blank; if it is zero, DNA concentration and yield will be zero; Number)</li>
+                <li><strong>A280</strong> (Optional, can't be zero; number)</li>
+                <li><strong>A320</strong> (Optional, number; can be left zero if not measured)</li>
+                <li><strong>Dilution factor</strong> (Optional, can’t be left zero if not measured, Undiluted sample is 1)</li>
+                <li><strong>Total volume of DNA</strong> (Can't be Zero; ml)</li>
+            </ul>
+            <p><strong>Outputs:</strong></p>
+            <ul>
+                <li><strong>DNA Concentration (μg/ml)</strong> = (A260 value - A320 value) × dilution factor × 50 μg/ml</li>
+                <li><strong>Total DNA Yield (μg)</strong> = DNA Concentration (μg/ml) × total sample volume (ml)</li>
+                <li><strong>DNA Purity Check 1</strong>: (A260 value - A320 value) / (A280 value - A320 value)</li>
+                <ul>
+                    <li>A value less than 1.8 and above is considered pure in quality.</li>
+                    <li>A value 1.5-1.8 is considered as good.</li>
+                    <li>A value below 1.5 is considered as impure.</li>
+                </ul>
+                <li><strong>DNA Purity Check 2</strong>: (A260 value) / (A230 value)</li>
+                <ul>
+                    <li>A value of 2-2.2 is considered as pure.</li>
+                    <li>A value of 1.5-2 is considered as good.</li>
+                    <li>A value below 1.5 is considered as impure.</li>
+                </ul>
+            </ul>
+        </div>
+        <div class="result" id="output"></div>
+    </div>
+</body>
+</html>
